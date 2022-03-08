@@ -313,8 +313,6 @@ int main(int argc, char **argv)
 	double kerTime = 0.0;
 	double setTime = 0.0;
 	double totalTime = 0.0;
-	double kernelCreateTime = 0.0;
-	double kernelArgTime = 0.0;
 	double kernelRunTime = 0.0;
 
 
@@ -381,17 +379,11 @@ int main(int argc, char **argv)
 		gettimeofday(&kernelStart,NULL);
 		//printf("1%s\n",TranslateOpenCLError(err));
 		
-		gettimeofday(&kernelCreateStart,NULL);
 		kernel = clCreateKernel(program, "Cipher", &err);
-		gettimeofday(&kernelCreateEnd,NULL);
-		kernelCreateTime +=  (double)((kernelCreateEnd.tv_sec - kernelCreateStart.tv_sec) * 1000 + (double)(kernelCreateEnd.tv_usec - kernelCreateStart.tv_usec) /1000);
-		
-		//printf("3%s\n",TranslateOpenCLError(err));
-		gettimeofday(&kernelArgStart,NULL);
+			
+		//printf("3%s\n",TranslateOpenCLError(err));	
 		clSetKernelArg(kernel,0,sizeof(cl_mem),&buffer);
-		gettimeofday(&kernelArgEnd,NULL);
-		kernelArgTime +=  (double)((kernelArgEnd.tv_sec - kernelArgStart.tv_sec) * 1000 + (double)(kernelArgEnd.tv_usec - kernelArgStart.tv_usec) /1000);
-		
+
 		gettimeofday(&kernelRunStart,NULL);
 		err = clEnqueueNDRangeKernel(cmdqueue,kernel,1,NULL,&globalws,0,0,NULL,NULL);
 		gettimeofday(&kernelRunEnd,NULL);
@@ -426,8 +418,6 @@ int main(int argc, char **argv)
 	printf("setTime : %fms ratio : %f\n",setTime, setTime/totalTime*100);
 	printf("memTime : %fms ratio : %f\n",memTime, memTime/totalTime*100);
 	printf("kerenlTime : %fms ratio : %f\n",kerTime, kerTime/totalTime*100);
-	printf("kerenlCreateTime : %fms ratio : %f kernel Ratio : %f\n",kernelCreateTime, kernelCreateTime/totalTime*100,kernelCreateTime/kerTime*100);
-	printf("kerenlArgTime : %fms ratio : %f kernel Ratio : %f\n",kernelArgTime, kernelArgTime/totalTime*100,kernelArgTime/kerTime*100);
 	printf("kerenlRunTime : %fms ratio : %f kernel Ratio : %f\n",kernelRunTime, kernelRunTime/totalTime*100,kernelRunTime/kerTime*100);
 
 }
