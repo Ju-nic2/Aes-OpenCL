@@ -382,6 +382,10 @@ int main(int argc, char **argv)
 		//printf("3%s\n",TranslateOpenCLError(err));
 		clSetKernelArg(kernel,0,sizeof(cl_mem),&buffer);
 		
+			
+		//printf("3%s\n",TranslateOpenCLError(err));	
+		clSetKernelArg(kernel,0,sizeof(cl_mem),&buffer);
+
 		gettimeofday(&kernelRunStart,NULL);
 		err = clEnqueueNDRangeKernel(cmdqueue,kernel,1,NULL,&globalws,0,0,NULL,NULL);
 		gettimeofday(&kernelRunEnd,NULL);
@@ -403,7 +407,6 @@ int main(int argc, char **argv)
 		{
 			for(int j = 0; j < 16; j++)
 			{
-				//printf("%x \n",data[i*16 +j]);
 				outBuffer[j] = data[i*16 +j];
 			}
 			fwrite(outBuffer,1,sizeof(outBuffer),outputFile);
