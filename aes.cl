@@ -81,9 +81,7 @@ __kernel void MixColumns(__local unsigned char state[4][4])
         ts = state[0][i];
         Tmp = state[0][i] ^ state[1][i] ^ state[2][i] ^ state[3][i];
         Tm = state[0][i] ^ state[1][i];
-		//printf("1 %x \n",Tm << 1);
 		printf("");
-		//printf("3 %x \n",(Tm >> 7)&1);
 		Tm = ((Tm<<1) ^ (((Tm>>7) & 1) * 0x1b));
 
 		state[0][i] ^= Tm ^ Tmp;
@@ -106,12 +104,11 @@ __kernel void Cipher(__global unsigned char *data)
 {
 	__local unsigned char state[4][4];
 	int address = get_global_id(0);
-	//printf("START \n\n");
 	int i,j;
 	for (i = 0; i<4; i++){
         for (j = 0; j<4; j++){
             state[j][i] = data[(address*16) + i*4 + j];
-			//printf("%d : %x \n",address,state[j][i]);
+			//printf("%x ",state[j][i]);
 		}
 	}
 	//printf("\n");
@@ -126,15 +123,11 @@ __kernel void Cipher(__global unsigned char *data)
     SubBytes(state);
     ShiftRows(state);
     AddRoundKey(state,Nr);
-	//printf("AAA : %d\n",Nr);
 
-	//printf("kernel\n");
     for (i = 0; i<4; i++){
         for (j = 0; j<4; j++){
             data[(address*16) + i*4 + j] = state[j][i];
-			//printf("%x ",state[j][i]);
 		}
 	}
-	//printf("\n");
 }
 
