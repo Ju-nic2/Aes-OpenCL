@@ -9,8 +9,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "util.h"
 using namespace std;
 cl_device_id device ;
@@ -292,9 +296,8 @@ if (err == CL_BUILD_PROGRAM_FAILURE) {
     }
 	
 	//printf("2%s\n",TranslateOpenCLError(err));
-
-
 }
+
 int main(int argc, char **argv)
 {
 
@@ -335,6 +338,7 @@ int main(int argc, char **argv)
 	}
 	cl_int err;
 	int cores = 0;
+	int fileSize = 0;
 	unsigned char *data = (unsigned char*)malloc(sizeof(unsigned char) * 16 * maxCoreNum);
 	cl_mem buffer = clCreateBuffer(context,CL_MEM_READ_WRITE, maxCoreNum*16*sizeof(unsigned char),NULL,&err);
 	//printf("a%s\n",TranslateOpenCLError(err));
@@ -409,17 +413,39 @@ int main(int argc, char **argv)
 			{
 				outBuffer[j] = data[i*16 +j];
 			}
+			fileSize++;
 			fwrite(outBuffer,1,sizeof(outBuffer),outputFile);
 		}
 
 	}
 	gettimeofday(&end,NULL);
-	
 	totalTime =  (double)((end.tv_sec - start.tv_sec) * 1000 + (double)(end.tv_usec - start.tv_usec) /1000);
-	printf("Time : %fms\n", totalTime);
-	printf("setTime : %fms ratio : %f\n",setTime, setTime/totalTime*100);
-	printf("memTime : %fms ratio : %f\n",memTime, memTime/totalTime*100);
-	printf("kerenlTime : %fms ratio : %f\n",kerTime, kerTime/totalTime*100);
-	printf("kerenlRunTime : %fms ratio : %f kernel Ratio : %f\n",kernelRunTime, kernelRunTime/totalTime*100,kernelRunTime/kerTime*100);
+	char logFileName[256];
+	char *inputFileName = strtok(argv[1],".");
+
+	if(fileSize < 64000)
+		sprintf(logFileName,"./log/%dk_out_aes.txt",fileSize/64);
+	else
+		sprintf(logFileName,"./log/%dm_out_aes.txt",fileSize/64000);
+	FILE *logFile;
+	if((logFile = fopen(logFileName,"a")) == NULL)
+	{
+		if(mkdir("log",0776) == -1){
+			fprintf(stderr,"logfile error1");
+			exit(1);
+		}
+		else{
+			if((logFile = fopen(logFileName,"a")) == NULL){
+				fprintf(stderr,"logfile error");
+				exit(1);
+			}
+		}
+	}
+
+		fprintf(logFile,"#%s %f %f %f %f %f\n",argv[4],totalTime,setTime,memTime,kerTime,kernelRunTime);
+	fclose(logFile);
+
 
 }
+
+
